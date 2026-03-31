@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tiếp nhận hồ sơ — Dịch vụ công</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --green:  #0f4c2a;
+  --green2: #1a6b3c;
+  --gl:     #e4f0e9;
+  --gb:     #8fc4a4;
+  --red:    #7c1d1d;
+  --redbg:  #fdf0f0;
+  --rdb:    #e8a0a0;
+  --amb:    #78350f;
+  --ambbg:  #fefce8;
+  --ambb:   #d4a017;
+  --blue:   #1e3a5f;
+  --bluebg: #eef4fb;
+  --blueb:  #93b8d8;
+  --border: #d4d0c8;
+  --bg:     #f2f0eb;
+  --card:   #ffffff;
+  --text:   #111110;
+  --text2:  #3d3c38;
+  --muted:  #5c5a54;
+  --r: 18px;
+  --rsm: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 20px; }
+
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.55;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--green);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-title {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.topbar-cfg {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.65rem; font-weight: 600;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 8px; cursor: pointer;
+}
+
+/* ── CONFIG BANNER ── */
+#cfg-banner {
+  background: var(--ambbg);
+  border-bottom: 2px solid var(--ambb);
+  padding: 10px 20px;
+  font-size: 0.7rem;
+  color: var(--amb);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+#cfg-banner a { color: var(--amb); font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+/* ── SHELL ── */
+.shell {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+}
+
+/* ── PROGRESS ── */
+.prog {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  gap: 0;
+}
+.pb {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+.pb::after {
+  content: '';
+  position: absolute;
+  top: 17px; left: 55%;
+  width: 90%; height: 2px;
+  background: var(--border);
+  z-index: 0;
+  transition: background 0.4s;
+}
+.pb:last-child::after { display: none; }
+.pb.done::after { background: var(--green); }
+.pb-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2.5px solid var(--border);
+  background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 800;
+  color: var(--muted);
+  position: relative; z-index: 1;
+  transition: all 0.3s;
+}
+.pb.active .pb-dot { border-color: var(--green); background: var(--green); color: #fff; box-shadow: 0 0 0 5px var(--gl); }
+.pb.done .pb-dot { border-color: var(--green); background: var(--gl); color: var(--green); }
+.pb-lbl { font-size: 0.55rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; text-align: center; }
+.pb.active .pb-lbl { color: var(--green); }
+
+/* ── SCREENS ── */
+.screen { display: none; animation: fu 0.25s ease; }
+.screen.active { display: block; }
+@keyframes fu { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px 22px 20px;
+  margin-bottom: 14px;
+}
+.card-step { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.card-title { font-size: 1.2rem; font-weight: 800; color: var(--text); margin-bottom: 6px; line-height: 1.25; letter-spacing: -0.01em; }
+.card-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+
+/* ── PROC BUTTONS — big, tap-friendly ── */
+.proc-list { display: flex; flex-direction: column; gap: 10px; }
+.proc-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 2.5px solid var(--border);
+  border-radius: var(--rsm);
+  background: #fafaf7;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+.proc-btn:active { transform: scale(0.98); }
+.proc-btn.selected {
+  border-color: var(--green);
+  background: var(--gl);
+  box-shadow: 0 0 0 3px var(--gl);
+}
+.proc-icon { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+.proc-name { font-size: 1rem; font-weight: 800; color: var(--text); display: block; margin-bottom: 2px; }
+.proc-desc { font-size: 0.72rem; color: var(--muted); display: block; }
+.proc-check {
+  margin-left: auto;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--green); color: #fff;
+  display: none; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; flex-shrink: 0;
+}
+.proc-btn.selected .proc-check { display: flex; }
+
+/* ── ALERT ── */
+.alert {
+  border-radius: var(--rsm);
+  padding: 14px 16px;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  margin-bottom: 14px;
+  border-left: 4px solid;
+}
+.alert strong { font-weight: 700; display: block; margin-bottom: 3px; }
+.alert-red   { background: var(--redbg); color: var(--red);  border-color: #b91c1c; }
+.alert-amb   { background: var(--ambbg); color: var(--amb);  border-color: #b45309; }
+.alert-green { background: var(--gl);    color: var(--green); border-color: var(--green); }
+.alert-blue  { background: var(--bluebg); color: var(--blue); border-color: #2563eb; }
+
+/* ── VNEID CHECK — big radio style ── */
+.radio-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+.radio-btn {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px;
+  border: 2.5px solid var(--border);
+  border-radius: var(--rsm);
+  background: #fafaf7;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.radio-btn.selected { border-color: var(--green); background: var(--gl); }
+.radio-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2.5px solid var(--border);
+  flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.radio-btn.selected .radio-dot { border-color: var(--green); background: var(--green); }
+.radio-btn.selected .radio-dot::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #fff; display: block; }
+.radio-label { font-size: 0.9rem; font-weight: 700; color: var(--text); display: block; margin-bottom: 3px; }
+.radio-sub   { font-size: 0.7rem; color: var(--muted); line-height: 1.5; }
+
+/* ── DOC CHECK — simple YES/NO per item ── */
+.doc-item {
+  border: 2px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: #fafaf7;
+}
+.doc-item.req { border-left: 5px solid var(--red); }
+.doc-item-name { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.45; }
+.doc-yesno { display: flex; gap: 10px; }
+.doc-yn-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--rsm);
+  background: #fafaf7;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.85rem; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.doc-yn-btn.yes.active { border-color: var(--green); background: var(--gl); color: var(--green); }
+.doc-yn-btn.no.active  { border-color: var(--red);   background: var(--redbg); color: var(--red); }
+.doc-yn-btn:not(.active) { color: var(--muted); }
+.doc-badge {
+  display: inline-block;
+  font-size: 0.6rem; font-weight: 800;
+  padding: 2px 8px; border-radius: 99px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.badge-req { background: var(--red); color: #fff; }
+.badge-opt { background: #e0ddd5; color: var(--muted); }
+
+/* ── FORM ── */
+.form-sec {
+  font-size: 0.65rem; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 18px 0 8px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 14px;
+}
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 0.82rem; font-weight: 700;
+  color: var(--text2); margin-bottom: 7px;
+}
+.req-star { color: #dc2626; margin-left: 3px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 1rem;
+  padding: 14px 16px;
+  border: 2.5px solid var(--border);
+  border-radius: var(--rsm);
+  background: #fafaf7;
+  color: var(--text);
+  transition: all 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--green);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--gl);
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field .hint { font-size: 0.65rem; color: var(--muted); margin-top: 5px; }
+.field-err { font-size: 0.7rem; color: var(--red); margin-top: 5px; font-weight: 700; display: none; }
+.field.invalid input, .field.invalid select { border-color: #dc2626; background: var(--redbg); }
+.field.invalid .field-err { display: block; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 12px; margin-top: 22px; }
+.btn {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 1rem; font-weight: 800;
+  padding: 16px 28px;
+  border-radius: var(--rsm);
+  cursor: pointer; border: none;
+  transition: all 0.18s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  line-height: 1;
+}
+.btn-primary { background: var(--green); color: #fff; box-shadow: 0 3px 10px rgba(15,76,42,0.25); }
+.btn-primary:hover { background: var(--green2); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { background: var(--border); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--muted); border: 2px solid var(--border); }
+.btn-ghost:hover { border-color: var(--green); color: var(--green); }
+.btn-full { width: 100%; }
+
+/* ── BLOCKED ── */
+.blocked {
+  text-align: center; padding: 32px 20px 24px;
+}
+.blocked-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+.blocked-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; line-height: 1.3; }
+.blocked-msg { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; line-height: 1.65; }
+.blocked-list {
+  text-align: left;
+  border-radius: var(--rsm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 2px solid;
+}
+.bl-red   { background: var(--redbg); border-color: var(--rdb); }
+.bl-amb   { background: var(--ambbg); border-color: var(--ambb); }
+.blocked-list-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.blt-red { color: var(--red); }
+.blt-amb { color: var(--amb); }
+.blocked-item { display: flex; gap: 10px; align-items: flex-start; font-size: 0.82rem; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); line-height: 1.5; }
+.blocked-item:last-child { border-bottom: none; }
+
+/* ── COMPLETE ── */
+.complete { text-align: center; padding: 40px 20px 28px; }
+.complete-seal {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: var(--gl); border: 3px solid var(--gb);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; margin: 0 auto 20px;
+}
+.complete-title { font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 8px; }
+.complete-ts { font-size: 0.7rem; color: var(--muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.complete-queue {
+  background: var(--ambbg);
+  border: 2px solid var(--ambb);
+  border-radius: var(--rsm);
+  padding: 18px 20px;
+  margin: 18px auto 0;
+  max-width: 400px;
+  font-size: 1rem; font-weight: 700;
+  color: var(--amb); line-height: 1.6;
+}
+.cq-icon { font-size: 1.6rem; display: block; margin-bottom: 8px; }
+
+/* ── SEND STATUS ── */
+.send-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--rsm);
+  font-size: 0.78rem; font-weight: 600;
+  margin-bottom: 8px; border: 1.5px solid;
+}
+.sr-sending { background: var(--bluebg); color: var(--blue); border-color: var(--blueb); }
+.sr-success { background: var(--gl); color: var(--green); border-color: var(--gb); }
+.sr-error   { background: var(--redbg); color: var(--red); border-color: var(--rdb); }
+.spinner { width: 16px; height: 16px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SUMMARY ── */
+.sum-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid #eee; font-size: 0.78rem; }
+.sum-row:last-child { border-bottom: none; }
+.sum-key { color: var(--muted); min-width: 160px; flex-shrink: 0; font-weight: 500; }
+.sum-val { color: var(--text); font-weight: 700; flex: 1; word-break: break-word; }
+.sum-sec { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin: 14px 0 6px; padding-bottom: 5px; border-bottom: 1.5px solid var(--border); }
+
+/* ── MODAL ── */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: flex-start; justify-content: center; padding: 40px 16px; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--card); border-radius: var(--r); padding: 24px 22px 20px; width: 100%; max-width: 500px; box-shadow: 0 24px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+.modal-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+@media (max-width: 480px) {
+  html { font-size: 18px; }
+  .card { padding: 18px 16px 16px; }
+  .btn { padding: 15px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="cfg-banner">
+  ⚙️ <strong>Chưa cấu hình.</strong>
+  <a onclick="openCfg()">Nhấn đây để cài đặt Google Sheets & Telegram</a>
+</div>
+
+<div class="topbar">
+  <div class="topbar-title">🏛️ Tiếp nhận hồ sơ Dịch vụ công</div>
+  <button class="topbar-cfg" onclick="openCfg()">⚙ Cài đặt</button>
+</div>
+
+<div class="shell">
+
+  <!-- Progress -->
+  <div class="prog">
+    <div class="pb active" id="pb1"><div class="pb-dot">1</div><div class="pb-lbl">Thủ tục</div></div>
+    <div class="pb" id="pb2"><div class="pb-dot">2</div><div class="pb-lbl">VneID</div></div>
+    <div class="pb" id="pb3"><div class="pb-dot">3</div><div class="pb-lbl">Giấy tờ</div></div>
+    <div class="pb" id="pb4"><div class="pb-dot">4</div><div class="pb-lbl">Thông tin</div></div>
+    <div class="pb" id="pb5"><div class="pb-dot">5</div><div class="pb-lbl">Xong</div></div>
+  </div>
+
+  <!-- ═══ BƯỚC 1: Chọn thủ tục — tự nhảy tiếp ═══ -->
+  <div class="screen active" id="sc1">
+    <div class="card">
+      <div class="card-step">Bước 1 / 5</div>
+      <div class="card-title">Anh/chị cần làm thủ tục gì?</div>
+      <div class="card-sub">Nhấn vào một loại thủ tục bên dưới</div>
+      <div class="proc-list">
+        <button class="proc-btn" data-proc="khaisinh" onclick="pickProc(this)">
+          <span class="proc-icon">👶</span>
+          <span><span class="proc-name">Đăng ký khai sinh</span><span class="proc-desc">Đăng ký cho trẻ mới sinh</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="kethon" onclick="pickProc(this)">
+          <span class="proc-icon">💍</span>
+          <span><span class="proc-name">Đăng ký kết hôn</span><span class="proc-desc">Đăng ký hôn nhân</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="khaitzu" onclick="pickProc(this)">
+          <span class="proc-icon">🕊️</span>
+          <span><span class="proc-name">Đăng ký khai tử</span><span class="proc-desc">Đăng ký tử vong</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="cccd" onclick="pickProc(this)">
+          <span class="proc-icon">🪪</span>
+          <span><span class="proc-name">CCCD / Cư trú</span><span class="proc-desc">Đổi CCCD, đăng ký thường trú</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="hocchieu" onclick="pickProc(this)">
+          <span class="proc-icon">📗</span>
+          <span><span class="proc-name">Hộ chiếu</span><span class="proc-desc">Cấp mới hoặc gia hạn</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="kinhdoanh" onclick="pickProc(this)">
+          <span class="proc-icon">🏢</span>
+          <span><span class="proc-name">Đăng ký kinh doanh</span><span class="proc-desc">Hộ kinh doanh, doanh nghiệp</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="datdai" onclick="pickProc(this)">
+          <span class="proc-icon">🏠</span>
+          <span><span class="proc-name">Đất đai / Nhà ở</span><span class="proc-desc">Sang tên, cấp sổ đỏ</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+        <button class="proc-btn" data-proc="baohiem" onclick="pickProc(this)">
+          <span class="proc-icon">🏥</span>
+          <span><span class="proc-name">Bảo hiểm YT / XH</span><span class="proc-desc">Tham gia, gia hạn BHYT/BHXH</span></span>
+          <span class="proc-check">✓</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 2: Xác thực VneID ═══ -->
+  <div class="screen" id="sc2">
+    <div class="card">
+      <div class="card-step">Bước 2 / 5</div>
+      <div class="card-title">Xác thực danh tính</div>
+      <div class="card-sub">Anh/chị có tài khoản VNeID xác thực mức 2 (chính chủ) không?</div>
+      <div class="alert alert-blue">
+        <strong>VNeID mức 2 là gì?</strong>
+        Tài khoản VNeID đã được xác minh danh tính tại Công an — ứng dụng hiển thị "Mức độ 2" màu xanh lá. Đây là yêu cầu bắt buộc từ năm 2025 để thực hiện thủ tục hành chính trực tuyến.
+      </div>
+      <div class="radio-list">
+        <div class="radio-btn" onclick="pickVneid('chinh_chu', this)">
+          <div class="radio-dot"></div>
+          <div>
+            <span class="radio-label">Có — VNeID mức 2 chính chủ</span>
+            <span class="radio-sub">Tự làm thủ tục với tài khoản của mình</span>
+          </div>
+        </div>
+        <div class="radio-btn" onclick="pickVneid('uy_quyen', this)">
+          <div class="radio-dot"></div>
+          <div>
+            <span class="radio-label">Không — Nhờ người khác làm hộ</span>
+            <span class="radio-sub">Người làm hộ phải có VNeID mức 2 và giấy ủy quyền</span>
+          </div>
+        </div>
+        <div class="radio-btn" onclick="pickVneid('chua_co', this)">
+          <div class="radio-dot"></div>
+          <div>
+            <span class="radio-label">Chưa có VNeID mức 2</span>
+            <span class="radio-sub">Cần kích hoạt trước khi làm thủ tục</span>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goS(1)">← Quay lại</button>
+        <button class="btn btn-primary" id="btn-vneid" onclick="checkVneid()" disabled>Tiếp tục →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 2B: Bị chặn VneID ═══ -->
+  <div class="screen" id="sc2b">
+    <div class="card">
+      <div class="blocked">
+        <span class="blocked-icon">📱</span>
+        <div class="blocked-title" style="color:var(--amb)">Cần kích hoạt VNeID mức 2</div>
+        <div class="blocked-msg">Từ năm 2025, tất cả thủ tục hành chính đều yêu cầu tài khoản VNeID đã xác thực mức 2. Anh/chị cần hoàn thành bước này trước.</div>
+        <div class="blocked-list bl-amb">
+          <div class="blocked-list-title blt-amb">Cách kích hoạt VNeID mức 2:</div>
+          <div class="blocked-item"><span>1️⃣</span><span>Tải ứng dụng <strong>VNeID</strong> trên điện thoại (App Store / CH Play)</span></div>
+          <div class="blocked-item"><span>2️⃣</span><span>Đăng ký tài khoản bằng số CCCD gắn chip</span></div>
+          <div class="blocked-item"><span>3️⃣</span><span>Đến <strong>Công an xã/phường</strong> gần nhất để xác thực mức 2 (miễn phí, mang theo CCCD)</span></div>
+          <div class="blocked-item"><span>4️⃣</span><span>Sau khi xác thực xong, quay lại đây để tiếp tục</span></div>
+        </div>
+        <div class="btn-row" style="justify-content:center;flex-direction:column;gap:10px;">
+          <button class="btn btn-ghost btn-full" onclick="goS(2)">← Quay lại chọn lại</button>
+          <button class="btn btn-ghost btn-full" onclick="goS(1)">Chọn thủ tục khác</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 2C: Ủy quyền ═══ -->
+  <div class="screen" id="sc2c">
+    <div class="card">
+      <div class="card-step">Bước 2 / 5 — Làm hộ / Ủy quyền</div>
+      <div class="card-title">Thông tin người làm hộ</div>
+      <div class="card-sub">Người làm hộ phải có VNeID mức 2 và giấy ủy quyền hợp lệ</div>
+      <div class="alert alert-amb">
+        <strong>Lưu ý:</strong> Giấy ủy quyền cần có chữ ký của người ủy quyền và được xác nhận tại cơ quan có thẩm quyền hoặc công chứng.
+      </div>
+      <div class="field">
+        <label>Họ tên người làm hộ <span class="req-star">*</span></label>
+        <input type="text" id="uy-ten" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="field">
+        <label>Số CCCD người làm hộ <span class="req-star">*</span></label>
+        <input type="text" id="uy-cccd" inputmode="numeric" placeholder="0xxxxxxxxxx">
+      </div>
+      <div class="field">
+        <label>Quan hệ với người được ủy quyền <span class="req-star">*</span></label>
+        <select id="uy-qh" style="appearance:auto;">
+          <option value="">— Chọn —</option>
+          <option>Con trai / Con gái</option>
+          <option>Vợ / Chồng</option>
+          <option>Bố / Mẹ</option>
+          <option>Anh / Chị / Em ruột</option>
+          <option>Người đại diện hợp pháp</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Đã có giấy ủy quyền chưa? <span class="req-star">*</span></label>
+        <select id="uy-giay" style="appearance:auto;">
+          <option value="">— Chọn —</option>
+          <option value="co">Có — đã chuẩn bị sẵn</option>
+          <option value="chua">Chưa có</option>
+        </select>
+      </div>
+      <div id="uy-chua-alert" style="display:none;" class="alert alert-red">
+        <strong>Chưa đủ điều kiện.</strong> Cần chuẩn bị giấy ủy quyền trước khi tiến hành thủ tục.
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goS(2)">← Quay lại</button>
+        <button class="btn btn-primary" onclick="checkUyQuyen()">Tiếp tục →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 3: Giấy tờ — YES/NO từng cái ═══ -->
+  <div class="screen" id="sc3">
+    <div class="card">
+      <div class="card-step">Bước 3 / 5</div>
+      <div class="card-title" id="sc3-title">Giấy tờ cần mang theo</div>
+      <div class="card-sub" id="sc3-sub"></div>
+      <div id="sc3-alert"></div>
+      <div class="alert alert-blue">
+        Nhấn <strong>Có</strong> nếu anh/chị đang mang theo giấy tờ đó. Nhấn <strong>Không</strong> nếu chưa có.
+      </div>
+      <div id="sc3-docs"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goS(2)">← Quay lại</button>
+        <button class="btn btn-primary" onclick="checkDocs()">Xác nhận →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 3B: Thiếu giấy tờ ═══ -->
+  <div class="screen" id="sc3b">
+    <div class="card">
+      <div class="blocked">
+        <span class="blocked-icon">📋</span>
+        <div class="blocked-title" style="color:var(--amb)" id="bl-doc-title">Còn thiếu giấy tờ</div>
+        <div class="blocked-msg">Các giấy tờ dưới đây là bắt buộc. Anh/chị cần chuẩn bị đầy đủ trước khi tiến hành.</div>
+        <div class="blocked-list bl-amb">
+          <div class="blocked-list-title blt-amb">Giấy tờ còn thiếu:</div>
+          <div id="bl-doc-list"></div>
+        </div>
+        <div class="alert alert-amb">Chuẩn bị đầy đủ các giấy tờ trên, sau đó nhấn Quay lại để xác nhận lại.</div>
+        <div class="btn-row" style="flex-direction:column;gap:10px;">
+          <button class="btn btn-primary btn-full" onclick="goS(3)">← Quay lại xác nhận giấy tờ</button>
+          <button class="btn btn-ghost btn-full" onclick="goS(1)">Chọn thủ tục khác</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 4: Nhập thông tin ═══ -->
+  <div class="screen" id="sc4">
+    <div class="card">
+      <div class="card-step">Bước 4 / 5</div>
+      <div class="card-title" id="sc4-title">Điền thông tin hồ sơ</div>
+      <div class="card-sub">Điền đầy đủ các ô có dấu <span style="color:#dc2626;font-weight:800;">*</span></div>
+      <div id="sc4-form"></div>
+      <div class="alert alert-red" id="sc4-err" style="display:none;margin-top:8px;"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goS(3)">← Quay lại</button>
+        <button class="btn btn-primary" onclick="submitForm()">✓ Hoàn tất nộp thông tin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BƯỚC 5: Hoàn tất ═══ -->
+  <div class="screen" id="sc5">
+    <div class="card">
+      <div class="complete">
+        <div class="complete-seal">✅</div>
+        <div class="complete-title">Thông tin đã được tiếp nhận</div>
+        <div class="complete-ts" id="cpl-ts"></div>
+        <div class="complete-queue">
+          <span class="cq-icon">🔔</span>
+          Anh/chị vui lòng chờ đến lượt<br>được gọi để làm thủ tục.
+        </div>
+      </div>
+      <div style="padding:0 4px 8px;border-top:1px solid var(--border);margin-top:4px;padding-top:16px;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Trạng thái gửi dữ liệu</div>
+        <div id="send-statuses"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Thông tin đã nộp</div>
+      <div id="sum-body"></div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- Config Modal -->
+<div class="modal-bg" id="cfg-modal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Cài đặt kết nối</div>
+    <div class="modal-sub">Nhập thông tin một lần — hệ thống tự gửi sau mỗi hồ sơ.</div>
+    <div class="field">
+      <label>Google Apps Script URL</label>
+      <input type="url" id="cfg-su" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="field">
+      <label>Telegram Bot Token</label>
+      <input type="text" id="cfg-tt" placeholder="123456:ABC...">
+    </div>
+    <div class="field">
+      <label>Telegram Chat ID</label>
+      <input type="text" id="cfg-tc" placeholder="123456789">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCfg()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveCfg()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+let CFG = {
+  su: localStorage.getItem('dvc3_su')||'',
+  tt: localStorage.getItem('dvc3_tt')||'',
+  tc: localStorage.getItem('dvc3_tc')||''
+};
+function updateBanner(){ document.getElementById('cfg-banner').style.display=(CFG.su||CFG.tt)?'none':'flex'; }
+updateBanner();
+function openCfg(){ document.getElementById('cfg-su').value=CFG.su; document.getElementById('cfg-tt').value=CFG.tt; document.getElementById('cfg-tc').value=CFG.tc; document.getElementById('cfg-modal').classList.add('open'); }
+function closeCfg(){ document.getElementById('cfg-modal').classList.remove('open'); }
+function saveCfg(){ CFG.su=document.getElementById('cfg-su').value.trim(); CFG.tt=document.getElementById('cfg-tt').value.trim(); CFG.tc=document.getElementById('cfg-tc').value.trim(); localStorage.setItem('dvc3_su',CFG.su); localStorage.setItem('dvc3_tt',CFG.tt); localStorage.setItem('dvc3_tc',CFG.tc); updateBanner(); closeCfg(); alert('✅ Đã lưu!'); }
+document.getElementById('cfg-modal').addEventListener('click',function(e){if(e.target===this)closeCfg();});
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='S'){e.preventDefault();openCfg();}});
+
+// ── STATE ──
+let proc=null, vneidMode=null, docStates={}, formVals={};
+
+// ── PROCEDURES 2026 (bỏ sổ hộ khẩu, cấp huyện; dùng CCCD/VneID) ──
+const PROCS = {
+  khaisinh:{
+    name:'Đăng ký khai sinh', icon:'👶',
+    fee:'Miễn phí', place:'UBND xã/phường nơi cha hoặc mẹ thường trú',
+    deadline:'60 ngày từ ngày sinh',
+    alert:{type:'amb', text:'Hạn 60 ngày kể từ ngày sinh. Quá hạn bị phạt 200.000–400.000đ. Từ 2025: không cần sổ hộ khẩu, dùng CCCD hoặc tra cứu qua VNeID.'},
+    docs:[
+      {text:'Tờ khai đăng ký khai sinh (Mẫu TP/HT-2015-KS.1) — xin tại UBND', req:true},
+      {text:'Giấy chứng sinh do bệnh viện cấp — bản gốc', req:true},
+      {text:'CCCD của cha hoặc mẹ — bản gốc', req:true},
+      {text:'Giấy đăng ký kết hôn (nếu cha mẹ đã đăng ký kết hôn)', req:false},
+      {text:'Văn bản xác nhận UBND nếu sinh ngoài bệnh viện', req:false},
+    ],
+    formSections:[
+      {title:'Thông tin trẻ', fields:[
+        {id:'ten_tre', label:'Họ và tên trẻ', type:'text', req:true, ph:'Nguyễn Văn An'},
+        {id:'gt_tre',  label:'Giới tính', type:'select', req:true, opts:['Nam','Nữ']},
+        {id:'ns_tre',  label:'Ngày sinh', type:'date', req:true},
+        {id:'noi_sinh',label:'Nơi sinh', type:'text', ph:'Bệnh viện / địa chỉ...'},
+      ]},
+      {title:'Thông tin cha', fields:[
+        {id:'cha_ten', label:'Họ tên cha', type:'text', req:true, ph:'Nguyễn Văn B'},
+        {id:'cha_cccd',label:'Số CCCD cha', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'cha_ns',  label:'Ngày sinh cha', type:'date'},
+        {id:'cha_tt',  label:'Địa chỉ thường trú cha', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+      ]},
+      {title:'Thông tin mẹ', fields:[
+        {id:'me_ten',  label:'Họ tên mẹ', type:'text', req:true, ph:'Trần Thị C'},
+        {id:'me_cccd', label:'Số CCCD mẹ', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'me_ns',   label:'Ngày sinh mẹ', type:'date'},
+        {id:'me_tt',   label:'Địa chỉ thường trú mẹ', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+      ]},
+      {title:'Liên hệ', fields:[
+        {id:'sdt', label:'Số điện thoại liên hệ', type:'tel', ph:'09xx...'},
+        {id:'ghichu', label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'ngaysinh', q:'Trẻ sinh ngày nào?', type:'date',
+      validate(v){
+        if(!v) return {ok:false,msg:'Vui lòng nhập ngày sinh'};
+        const d=Math.floor((new Date()-new Date(v))/86400000);
+        if(d<0) return {ok:false,msg:'Ngày sinh không hợp lệ'};
+        if(d>365) return {ok:false,msg:`Trẻ đã ${Math.floor(d/365)} tuổi — quá 1 năm phải qua Tòa án`};
+        if(d>60) return {ok:false,msg:`Đã quá hạn ${d-60} ngày — sẽ bị phạt hành chính khi nộp`};
+        return {ok:true,msg:`Còn ${60-d} ngày trong hạn ✓`};
+      }
+    }],
+  },
+  kethon:{
+    name:'Đăng ký kết hôn', icon:'💍',
+    fee:'Miễn phí', place:'UBND xã/phường của một trong hai bên',
+    deadline:'5 ngày làm việc',
+    alert:{type:'amb', text:'Cả hai bên bắt buộc đến ký trực tiếp. Từ 2025: không cần sổ hộ khẩu, tra cứu qua cơ sở dữ liệu quốc gia.'},
+    docs:[
+      {text:'Tờ khai đăng ký kết hôn (Mẫu TP/HT-2015-KH.1) — 2 bản', req:true},
+      {text:'CCCD cả hai bên — bản gốc', req:true},
+      {text:'Giấy xác nhận tình trạng hôn nhân nếu hai bên khác xã/phường (cấp qua VNeID hoặc UBND)', req:false},
+      {text:'Bản án ly hôn có hiệu lực (nếu đã từng kết hôn)', req:false},
+    ],
+    formSections:[
+      {title:'Bên nam', fields:[
+        {id:'nam_ten',  label:'Họ và tên', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'nam_ns',   label:'Ngày sinh', type:'date', req:true},
+        {id:'nam_cccd', label:'Số CCCD', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'nam_tt',   label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'nam_sdt',  label:'Số điện thoại', type:'tel', ph:'09xx...'},
+        {id:'nam_hn',   label:'Tình trạng hôn nhân', type:'select', opts:['Chưa kết hôn lần nào','Đã ly hôn','Vợ đã mất']},
+      ]},
+      {title:'Bên nữ', fields:[
+        {id:'nu_ten',   label:'Họ và tên', type:'text', req:true, ph:'Trần Thị B'},
+        {id:'nu_ns',    label:'Ngày sinh', type:'date', req:true},
+        {id:'nu_cccd',  label:'Số CCCD', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'nu_tt',    label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'nu_sdt',   label:'Số điện thoại', type:'tel', ph:'09xx...'},
+        {id:'nu_hn',    label:'Tình trạng hôn nhân', type:'select', opts:['Chưa kết hôn lần nào','Đã ly hôn','Chồng đã mất']},
+      ]},
+      {title:'Thông tin bổ sung', fields:[
+        {id:'ghichu', label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[
+      {id:'ns_nam', q:'Ngày sinh bên nam?', type:'date',
+       validate(v){if(!v) return {ok:false,msg:'Vui lòng nhập'}; const a=Math.floor((new Date()-new Date(v))/(365.25*86400000)); return a>=20?{ok:true,msg:`${a} tuổi ✓`}:{ok:false,msg:`${a} tuổi — chưa đủ 20 tuổi`};}},
+      {id:'ns_nu',  q:'Ngày sinh bên nữ?',  type:'date',
+       validate(v){if(!v) return {ok:false,msg:'Vui lòng nhập'}; const a=Math.floor((new Date()-new Date(v))/(365.25*86400000)); return a>=18?{ok:true,msg:`${a} tuổi ✓`}:{ok:false,msg:`${a} tuổi — chưa đủ 18 tuổi`};}},
+    ],
+  },
+  khaitzu:{
+    name:'Đăng ký khai tử', icon:'🕊️',
+    fee:'Miễn phí', place:'UBND xã/phường nơi người mất thường trú',
+    deadline:'15 ngày từ ngày mất',
+    alert:{type:'amb', text:'Hạn 15 ngày kể từ ngày mất. Quá hạn bị phạt. Cần làm trước khi thừa kế, dừng BHYT, thu hồi CCCD.'},
+    docs:[
+      {text:'Tờ khai đăng ký khai tử (Mẫu TP/HT-2015-KT.1) — xin tại UBND', req:true},
+      {text:'Giấy báo tử từ bệnh viện hoặc biên bản xác nhận của công an — bản gốc', req:true},
+      {text:'CCCD của người đến khai — bản gốc', req:true},
+      {text:'CCCD của người đã mất', req:true},
+      {text:'Giấy chứng nhận kết hôn (nếu người mất đã lập gia đình)', req:false},
+      {text:'Biên bản công an nếu chết do tai nạn hoặc đột tử', req:false},
+    ],
+    formSections:[
+      {title:'Thông tin người mất', fields:[
+        {id:'ten_mat',     label:'Họ tên người mất', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'gt_mat',      label:'Giới tính', type:'select', opts:['Nam','Nữ']},
+        {id:'ns_mat',      label:'Ngày sinh', type:'date'},
+        {id:'ngay_mat',    label:'Ngày mất', type:'date', req:true},
+        {id:'cccd_mat',    label:'Số CCCD người mất', type:'text', ph:'0xxxxxxxxxx'},
+        {id:'noi_mat',     label:'Nơi mất', type:'text', ph:'Tại nhà / Bệnh viện...'},
+        {id:'nguyen_nhan', label:'Nguyên nhân', type:'select', opts:['Bệnh','Tai nạn','Đột tử','Tuổi già']},
+        {id:'tt_mat',      label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+      ]},
+      {title:'Người đến khai', fields:[
+        {id:'khai_ten',  label:'Họ tên người khai', type:'text', req:true, ph:'Nguyễn Thị B'},
+        {id:'khai_qh',   label:'Quan hệ', type:'select', req:true, opts:['Vợ/Chồng','Con trai','Con gái','Bố/Mẹ','Anh/Chị/Em','Khác']},
+        {id:'khai_cccd', label:'Số CCCD người khai', type:'text', ph:'0xxxxxxxxxx'},
+        {id:'khai_sdt',  label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Ghi chú', fields:[
+        {id:'ghichu', label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'ngay_mat', q:'Người mất vào ngày nào?', type:'date',
+      validate(v){
+        if(!v) return {ok:false,msg:'Vui lòng nhập'};
+        const d=Math.floor((new Date()-new Date(v))/86400000);
+        if(d<0) return {ok:false,msg:'Không hợp lệ'};
+        if(d>15) return {ok:false,msg:`Quá hạn ${d-15} ngày — sẽ bị phạt, nhưng vẫn phải khai tử`};
+        return {ok:true,msg:`Còn ${15-d} ngày trong hạn ✓`};
+      }
+    }],
+  },
+  cccd:{
+    name:'CCCD / Cư trú', icon:'🪪',
+    fee:'30.000–70.000đ tuỳ loại', place:'Công an xã/phường hoặc Công an tỉnh',
+    deadline:'Theo lịch hẹn Công an',
+    alert:{type:'blue', text:'Từ 2025: không cần sổ hộ khẩu. Mọi thông tin cư trú được tra cứu qua Cơ sở dữ liệu quốc gia về dân cư. Chỉ cần mang CCCD.'},
+    docs:[
+      {text:'CCCD hoặc CMND cũ — bản gốc', req:true},
+      {text:'Ảnh thẻ 3x4cm (2 tấm) — nếu cấp lần đầu hoặc đổi', req:false},
+      {text:'Giấy tờ chứng minh lý do thay đổi (kết hôn, chuyển nơi ở...)', req:false},
+    ],
+    formSections:[
+      {title:'Thông tin cá nhân', fields:[
+        {id:'ten',   label:'Họ và tên', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'ns',    label:'Ngày sinh', type:'date', req:true},
+        {id:'gt',    label:'Giới tính', type:'select', opts:['Nam','Nữ']},
+        {id:'cccd',  label:'Số CCCD hiện tại', type:'text', ph:'0xxxxxxxxxx'},
+        {id:'sdt',   label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Thông tin yêu cầu', fields:[
+        {id:'loai', label:'Loại thủ tục', type:'select', req:true, opts:['Cấp CCCD lần đầu','Đổi CCCD hết hạn','Đổi CCCD thay đổi thông tin','Đăng ký thường trú mới','Chuyển nơi thường trú','Nhập cư (vợ/chồng/con)','Tách hộ khẩu (đăng ký độc lập)']},
+        {id:'tt_hien', label:'Địa chỉ thường trú hiện tại', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'tt_moi',  label:'Địa chỉ thường trú mới (nếu có)', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'ly_do',   label:'Lý do', type:'text', ph:'Hết hạn / chuyển nơi ở...'},
+        {id:'ghichu',  label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'loai_yc', q:'Anh/chị cần làm loại nào?', type:'select',
+      opts:['Cấp CCCD lần đầu','Đổi CCCD hết hạn','Đổi CCCD thay đổi thông tin','Đăng ký thường trú mới','Chuyển nơi thường trú','Nhập cư (vợ/chồng/con)'],
+      validate(v){ return v?{ok:true,msg:`✓ ${v}`}:{ok:false,msg:'Vui lòng chọn'}; }
+    }],
+  },
+  hocchieu:{
+    name:'Hộ chiếu', icon:'📗',
+    fee:'200.000đ (thường) / 400.000đ (khẩn)', place:'Công an tỉnh hoặc bộ phận một cửa tỉnh',
+    deadline:'5–8 ngày làm việc',
+    alert:{type:'blue', text:'Cần ảnh nền trắng 4x6cm. Từ 2025 có thể nộp hồ sơ qua VNeID và chọn nhận tại nhà hoặc đến lấy trực tiếp.'},
+    docs:[
+      {text:'CCCD gắn chip — bản gốc (bắt buộc từ 2025)', req:true},
+      {text:'Tờ khai cấp hộ chiếu (nhận tại Công an tỉnh hoặc tải qua VNeID)', req:true},
+      {text:'Ảnh thẻ nền trắng 4x6cm — 2 tấm', req:true},
+      {text:'Hộ chiếu cũ (nếu gia hạn hoặc đổi)', req:false},
+    ],
+    formSections:[
+      {title:'Thông tin cá nhân', fields:[
+        {id:'ten',     label:'Họ và tên (đúng như CCCD)', type:'text', req:true, ph:'NGUYEN VAN A'},
+        {id:'ns',      label:'Ngày sinh', type:'date', req:true},
+        {id:'gt',      label:'Giới tính', type:'select', opts:['Nam','Nữ']},
+        {id:'cccd',    label:'Số CCCD', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'tt',      label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'sdt',     label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Thông tin hộ chiếu', fields:[
+        {id:'loai_hc', label:'Loại yêu cầu', type:'select', opts:['Cấp lần đầu','Gia hạn','Đổi (hỏng/mất)']},
+        {id:'so_cu',   label:'Số hộ chiếu cũ (nếu có)', type:'text', ph:'B1234567'},
+        {id:'muc_dich',label:'Mục đích', type:'text', ph:'Du lịch / công tác...'},
+        {id:'ghichu',  label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'co_cccd', q:'Có CCCD gắn chip còn hiệu lực không?', type:'select',
+      opts:['Có CCCD gắn chip (mới nhất)','Chỉ có CMND cũ hoặc CCCD không gắn chip','Không có'],
+      validate(v){
+        if(!v) return {ok:false,msg:'Vui lòng chọn'};
+        if(v.includes('Không')||v.includes('CMND')) return {ok:false,msg:'Từ 2025 bắt buộc có CCCD gắn chip để làm hộ chiếu. Cần đổi CCCD gắn chip trước.'};
+        return {ok:true,msg:'✓ Đủ điều kiện'};
+      }
+    }],
+  },
+  kinhdoanh:{
+    name:'Đăng ký kinh doanh', icon:'🏢',
+    fee:'Miễn phí', place:'Sở Kế hoạch và Đầu tư tỉnh hoặc qua cổng đkdn.mpi.gov.vn',
+    deadline:'3 ngày làm việc',
+    alert:{type:'amb', text:'Từ 2025: đăng ký kinh doanh tập trung về Sở KH&ĐT tỉnh (không còn cấp huyện). Có thể đăng ký 100% trực tuyến qua đkdn.mpi.gov.vn với VNeID mức 2.'},
+    docs:[
+      {text:'Giấy đề nghị đăng ký hộ kinh doanh theo mẫu', req:true},
+      {text:'CCCD của chủ hộ kinh doanh — bản gốc', req:true},
+      {text:'Hợp đồng thuê mặt bằng (nếu thuê)', req:false},
+      {text:'Giấy phép kinh doanh ngành nghề có điều kiện (nếu có)', req:false},
+    ],
+    formSections:[
+      {title:'Thông tin chủ hộ', fields:[
+        {id:'ten',    label:'Họ và tên chủ hộ', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'ns',     label:'Ngày sinh', type:'date', req:true},
+        {id:'cccd',   label:'Số CCCD', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'tt',     label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'sdt',    label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Thông tin hộ kinh doanh', fields:[
+        {id:'ten_hkd', label:'Tên hộ kinh doanh', type:'text', req:true, ph:'Cửa hàng / Dịch vụ...'},
+        {id:'nganh',   label:'Ngành nghề kinh doanh', type:'text', req:true, ph:'Buôn bán tạp hoá / Dịch vụ ăn uống...'},
+        {id:'dc_kd',   label:'Địa chỉ kinh doanh', type:'text', req:true, ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'von',     label:'Vốn đầu tư (đồng)', type:'text', ph:'50.000.000'},
+        {id:'ghichu',  label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'tuoi', q:'Ngày sinh người đứng tên kinh doanh?', type:'date',
+      validate(v){if(!v) return {ok:false,msg:'Vui lòng nhập'}; const a=Math.floor((new Date()-new Date(v))/(365.25*86400000)); return a>=18?{ok:true,msg:`${a} tuổi ✓`}:{ok:false,msg:`${a} tuổi — chưa đủ 18 tuổi`};}
+    }],
+  },
+  datdai:{
+    name:'Đất đai / Nhà ở', icon:'🏠',
+    fee:'50.000–500.000đ + phí công chứng', place:'Văn phòng Đăng ký đất đai tỉnh (chi nhánh gần nhất)',
+    deadline:'15–30 ngày làm việc',
+    alert:{type:'amb', text:'Từ 2025: đăng ký đất đai tập trung tại Văn phòng ĐKĐĐ tỉnh. Không còn cấp huyện thụ lý. Bắt buộc công chứng hợp đồng trước khi nộp hồ sơ sang tên.'},
+    docs:[
+      {text:'Đơn đề nghị đăng ký biến động theo mẫu', req:true},
+      {text:'Giấy chứng nhận QSDĐ (Sổ đỏ/Sổ hồng) — bản gốc', req:true},
+      {text:'CCCD các bên — bản gốc', req:true},
+      {text:'Hợp đồng chuyển nhượng/tặng cho đã công chứng — bản gốc', req:true},
+      {text:'Giấy tờ quan hệ nhân thân (nếu thừa kế)', req:false},
+      {text:'Biên lai nộp thuế TNCN và lệ phí trước bạ', req:false},
+    ],
+    formSections:[
+      {title:'Bên chuyển nhượng', fields:[
+        {id:'a_ten',  label:'Họ tên bên A', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'a_cccd', label:'Số CCCD bên A', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'a_sdt',  label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Bên nhận', fields:[
+        {id:'b_ten',  label:'Họ tên bên B', type:'text', req:true, ph:'Trần Thị B'},
+        {id:'b_cccd', label:'Số CCCD bên B', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'b_sdt',  label:'Số điện thoại', type:'tel', ph:'09xx...'},
+        {id:'b_tt',   label:'Địa chỉ thường trú bên B', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+      ]},
+      {title:'Thông tin thửa đất', fields:[
+        {id:'so_so',  label:'Số Giấy chứng nhận (Sổ đỏ)', type:'text', ph:'CH 12345...'},
+        {id:'dc_dat', label:'Địa chỉ thửa đất', type:'text', req:true, ph:'Thửa số..., xã/phường, tỉnh...'},
+        {id:'loai_gd',label:'Loại giao dịch', type:'select', req:true, opts:['Mua bán','Tặng cho','Thừa kế','Tách thửa','Cấp sổ lần đầu']},
+        {id:'ghichu', label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'cong_chung', q:'Đã công chứng hợp đồng chưa?', type:'select',
+      opts:['Đã công chứng rồi','Chưa công chứng','Không cần (cấp sổ lần đầu / đính chính)'],
+      validate(v){
+        if(!v) return {ok:false,msg:'Vui lòng chọn'};
+        if(v==='Chưa công chứng') return {ok:false,msg:'Phải công chứng hợp đồng tại Văn phòng công chứng TRƯỚC khi nộp hồ sơ sang tên'};
+        return {ok:true,msg:'✓ Đủ điều kiện'};
+      }
+    }],
+  },
+  baohiem:{
+    name:'Bảo hiểm YT / XH', icon:'🏥',
+    fee:'Theo mức đóng quy định', place:'BHXH tỉnh hoặc đại lý thu',
+    deadline:'Đóng trước ngày 1 hàng tháng',
+    alert:{type:'green', text:'Từ 2025: đăng ký và gia hạn BHYT được thực hiện qua ứng dụng VNeID hoặc ứng dụng BHXH số. Người thứ 2 trở đi trong gia đình được giảm phí.'},
+    docs:[
+      {text:'Tờ khai tham gia BHYT/BHXH theo mẫu', req:true},
+      {text:'CCCD của người tham gia — bản gốc', req:true},
+      {text:'Ảnh thẻ 3x4cm (1 tấm) nếu cấp thẻ mới', req:false},
+      {text:'Thẻ BHYT cũ (nếu gia hạn hoặc đổi)', req:false},
+    ],
+    formSections:[
+      {title:'Người đăng ký', fields:[
+        {id:'ten',   label:'Họ và tên', type:'text', req:true, ph:'Nguyễn Văn A'},
+        {id:'ns',    label:'Ngày sinh', type:'date', req:true},
+        {id:'gt',    label:'Giới tính', type:'select', opts:['Nam','Nữ']},
+        {id:'cccd',  label:'Số CCCD', type:'text', req:true, ph:'0xxxxxxxxxx'},
+        {id:'tt',    label:'Địa chỉ thường trú', type:'text', ph:'Số nhà, đường, xã/phường, tỉnh...'},
+        {id:'sdt',   label:'Số điện thoại', type:'tel', ph:'09xx...'},
+      ]},
+      {title:'Thông tin bảo hiểm', fields:[
+        {id:'loai_bh', label:'Loại bảo hiểm', type:'select', req:true, opts:['BHYT hộ gia đình','BHYT diện cận nghèo','BHXH tự nguyện','Gia hạn BHYT','Đổi nơi KCB ban đầu','Cấp lại thẻ BHYT']},
+        {id:'cskcb',   label:'Nơi KCB ban đầu', type:'text', ph:'Trạm y tế xã / BV tỉnh...'},
+        {id:'so_the',  label:'Số thẻ BHYT cũ (nếu có)', type:'text', ph:'HS4...'},
+        {id:'so_ng',   label:'Số người cùng đăng ký (hộ gia đình)', type:'text', ph:'1'},
+        {id:'ghichu',  label:'Ghi chú', type:'textarea', ph:'Lưu ý...'},
+      ]},
+    ],
+    conds:[{
+      id:'loai_bh', q:'Cần đăng ký loại bảo hiểm nào?', type:'select',
+      opts:['BHYT hộ gia đình','BHYT cận nghèo','BHXH tự nguyện','Gia hạn BHYT','Đổi nơi KCB','Cấp lại thẻ'],
+      validate(v){ return v?{ok:true,msg:`✓ ${v}`}:{ok:false,msg:'Vui lòng chọn'}; }
+    }],
+  },
+};
+
+// ── NAVIGATION ──
+const screenMap = {1:'sc1',2:'sc2',3:'sc3',4:'sc4',5:'sc5','2b':'sc2b','2c':'sc2c','3b':'sc3b'};
+const pbMap = {'2b':2,'2c':2,'3b':3};
+
+function goS(n) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenMap[n]).classList.add('active');
+  const nn = pbMap[n]||n;
+  [1,2,3,4,5].forEach(i=>{
+    const el=document.getElementById('pb'+i);
+    el.classList.remove('active','done');
+    if(i==nn) el.classList.add('active');
+    else if(i<nn) el.classList.add('done');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── STEP 1: Pick proc & auto-advance ──
+function pickProc(btn) {
+  document.querySelectorAll('.proc-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  proc = btn.dataset.proc;
+  // Auto-advance after brief highlight
+  setTimeout(()=>goS(2), 300);
+}
+
+// ── STEP 2: VneID ──
+let vneidChoice = null;
+function pickVneid(val, el) {
+  document.querySelectorAll('.radio-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  vneidChoice = val;
+  document.getElementById('btn-vneid').disabled = false;
+}
+
+function checkVneid() {
+  if (!vneidChoice) return;
+  if (vneidChoice === 'chua_co') { goS('2b'); return; }
+  if (vneidChoice === 'uy_quyen') { goS('2c'); return; }
+  // chinh_chu — check conditions
+  checkProcConditions();
+}
+
+function checkUyQuyen() {
+  const ten  = document.getElementById('uy-ten').value.trim();
+  const cccd = document.getElementById('uy-cccd').value.trim();
+  const qh   = document.getElementById('uy-qh').value;
+  const giay = document.getElementById('uy-giay').value;
+  if (!ten||!cccd||!qh||!giay) { alert('Vui lòng điền đầy đủ thông tin'); return; }
+  if (giay === 'chua') {
+    document.getElementById('uy-chua-alert').style.display='block';
+    return;
+  }
+  checkProcConditions();
+}
+
+// ── Check proc-specific conditions ──
+let condAnswers = {};
+function checkProcConditions() {
+  const p = PROCS[proc];
+  if (!p.conds || p.conds.length === 0) { buildDocs(); goS(3); return; }
+  // Simple inline check with prompt
+  condAnswers = {};
+  const fails = [];
+  // Build a simple modal-like check inline
+  const answers = {};
+  let allAnswered = true;
+  // For conditions, show them one by one via simple prompts
+  showCondCheck(0, p.conds, ()=>{ buildDocs(); goS(3); });
+}
+
+function showCondCheck(idx, conds, onPass) {
+  if (idx >= conds.length) { onPass(); return; }
+  const c = conds[idx];
+  const val = c.type==='select'
+    ? promptSelect(c.q, c.opts)
+    : promptDate(c.q);
+  if (val === null) return; // cancelled
+  const r = c.validate(val);
+  if (!r.ok) {
+    showCondBlocked(r.msg, PROCS[proc]);
+  } else {
+    condAnswers[c.id] = val;
+    showCondCheck(idx+1, conds, onPass);
+  }
+}
+
+function promptSelect(q, opts) {
+  let msg = q + '\n\n';
+  opts.forEach((o,i) => msg += `${i+1}. ${o}\n`);
+  msg += '\nNhập số tương ứng:';
+  const ans = prompt(msg);
+  if (ans === null) return null;
+  const n = parseInt(ans);
+  return (n>=1 && n<=opts.length) ? opts[n-1] : null;
+}
+
+function promptDate(q) {
+  const ans = prompt(q + '\n\nNhập ngày (định dạng DD/MM/YYYY):');
+  if (!ans) return null;
+  const parts = ans.split('/');
+  if (parts.length !== 3) return null;
+  return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+}
+
+function showCondBlocked(msg, p) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  // Reuse sc2b for condition blocks
+  document.getElementById('sc2b').classList.add('active');
+  document.querySelector('#sc2b .blocked-title').textContent = '🚫 Chưa đủ điều kiện';
+  document.querySelector('#sc2b .blocked-msg').textContent = msg;
+  document.querySelector('#sc2b .blocked-list').innerHTML =
+    `<div class="blocked-list-title blt-red">Lý do:</div>
+     <div class="blocked-item"><span>🚫</span><span>${msg}</span></div>`;
+  const adv = p.blockedAdvice || 'Vui lòng đáp ứng đủ điều kiện rồi quay lại.';
+  document.querySelector('#sc2b .alert').textContent = adv;
+}
+
+// ── STEP 3: Docs ──
+let docYN = {};
+function buildDocs() {
+  const p = PROCS[proc];
+  document.getElementById('sc3-title').textContent = p.icon+' '+p.name+' — Giấy tờ cần mang theo';
+  document.getElementById('sc3-sub').textContent = `Nộp tại: ${p.place}  ·  Lệ phí: ${p.fee}`;
+  document.getElementById('sc3-alert').innerHTML = p.alert
+    ? `<div class="alert alert-${p.alert.type}">${p.alert.text}</div>` : '';
+
+  docYN = {};
+  const container = document.getElementById('sc3-docs');
+  container.innerHTML = '';
+
+  p.docs.forEach((doc, i) => {
+    docYN[i] = null;
+    const div = document.createElement('div');
+    div.className = 'doc-item' + (doc.req?' req':'');
+    div.innerHTML = `
+      <div style="margin-bottom:6px;">
+        <span class="doc-badge ${doc.req?'badge-req':'badge-opt'}">${doc.req?'Bắt buộc':'Tuỳ trường hợp'}</span>
+      </div>
+      <div class="doc-item-name">${doc.text}</div>
+      <div class="doc-yesno">
+        <button class="doc-yn-btn yes" data-i="${i}" onclick="setDocYN(${i},'yes',this)">✓ Có, đang mang theo</button>
+        <button class="doc-yn-btn no"  data-i="${i}" onclick="setDocYN(${i},'no',this)">✗ Chưa có</button>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function setDocYN(i, val, btn) {
+  const parent = btn.closest('.doc-yesno');
+  parent.querySelectorAll('.doc-yn-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  docYN[i] = val;
+}
+
+function checkDocs() {
+  const p = PROCS[proc];
+  const missing = p.docs.map((d,i)=>({...d,i})).filter(d=>d.req && docYN[d.i]!=='yes');
+  if (missing.length > 0) {
+    document.getElementById('bl-doc-title').textContent = `📋 Còn thiếu ${missing.length} giấy tờ bắt buộc`;
+    document.getElementById('bl-doc-list').innerHTML = missing.map(d=>
+      `<div class="blocked-item"><span>⬜</span><span>${d.text}</span></div>`).join('');
+    goS('3b'); return;
+  }
+  buildForm(); goS(4);
+}
+
+// ── STEP 4: Form ──
+function buildForm() {
+  const p = PROCS[proc];
+  document.getElementById('sc4-title').textContent = p.icon+' '+p.name+' — Thông tin hồ sơ';
+  const c = document.getElementById('sc4-form');
+  c.innerHTML = '';
+
+  // Ủy quyền info if applicable
+  if (vneidChoice === 'uy_quyen') {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="form-sec">Thông tin người làm hộ</div>
+      <div class="alert alert-amb" style="margin-bottom:14px;">
+        Người làm hộ: <strong>${document.getElementById('uy-ten').value}</strong> — CCCD: ${document.getElementById('uy-cccd').value}
+      </div>`;
+    c.appendChild(div);
+  }
+
+  p.formSections.forEach(sec => {
+    const hdr = document.createElement('div');
+    hdr.className = 'form-sec';
+    hdr.textContent = sec.title;
+    c.appendChild(hdr);
+    sec.fields.forEach(f => {
+      const wrap = document.createElement('div');
+      wrap.className = 'field'; wrap.id = 'fw-'+f.id;
+      let inp = '';
+      if (f.type==='select') {
+        inp = `<select id="ff-${f.id}" style="appearance:auto;-webkit-appearance:auto;">
+          <option value="">— Chọn —</option>
+          ${(f.opts||[]).map(o=>`<option>${o}</option>`).join('')}
+        </select>`;
+      } else if (f.type==='textarea') {
+        inp = `<textarea id="ff-${f.id}" placeholder="${f.ph||''}"></textarea>`;
+      } else {
+        inp = `<input type="${f.type}" id="ff-${f.id}" placeholder="${f.ph||''}" inputmode="${f.type==='tel'?'tel':f.type==='date'?'':'text'}">`;
+      }
+      wrap.innerHTML = `<label>${f.label}${f.req?'<span class="req-star">*</span>':''}</label>${inp}<div class="field-err">Vui lòng điền thông tin này</div>`;
+      c.appendChild(wrap);
+    });
+  });
+}
+
+function submitForm() {
+  const p = PROCS[proc]; let ok=true; formVals={};
+  p.formSections.forEach(sec=>{
+    sec.fields.forEach(f=>{
+      const el=document.getElementById('ff-'+f.id); if(!el) return;
+      const val=el.value.trim();
+      formVals[f.id]={label:f.label,value:val,section:sec.title};
+      const fw=document.getElementById('fw-'+f.id);
+      if(f.req&&!val){if(fw)fw.classList.add('invalid');ok=false;}
+      else{if(fw)fw.classList.remove('invalid');}
+    });
+  });
+  if(!ok){
+    const e=document.getElementById('sc4-err');
+    e.style.display='block';
+    e.innerHTML='<strong>Thiếu thông tin bắt buộc.</strong> Vui lòng điền đầy đủ các ô có dấu *.';
+    document.querySelector('.field.invalid')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  buildSummary();
+  const now=new Date();
+  document.getElementById('cpl-ts').textContent='Tiếp nhận lúc: '+now.toLocaleString('vi-VN');
+  goS(5); sendData();
+}
+
+function buildSummary() {
+  const p=PROCS[proc]; const b=document.getElementById('sum-body'); b.innerHTML='';
+  const addRow=(k,v)=>{ const r=document.createElement('div'); r.className='sum-row'; r.innerHTML=`<span class="sum-key">${k}</span><span class="sum-val">${v}</span>`; b.appendChild(r); };
+  addRow('Loại thủ tục',p.icon+' '+p.name);
+  addRow('Nơi nộp',p.place);
+  addRow('Lệ phí',p.fee);
+  if(vneidChoice==='uy_quyen') addRow('Người làm hộ',document.getElementById('uy-ten').value+' ('+document.getElementById('uy-cccd').value+')');
+  let curSec='';
+  Object.values(formVals).filter(f=>f.value).forEach(f=>{
+    if(f.section!==curSec){ curSec=f.section; const h=document.createElement('div'); h.className='sum-sec'; h.textContent=f.section; b.appendChild(h); }
+    addRow(f.label, fmtD(f.value));
+  });
+}
+
+function fmtD(v){ if(/^\d{4}-\d{2}-\d{2}$/.test(v)){const[y,m,d]=v.split('-');return`${d}/${m}/${y}`;} return v; }
+
+async function sendData() {
+  const p=PROCS[proc]; const c=document.getElementById('send-statuses'); c.innerHTML='';
+  const now=new Date().toLocaleString('vi-VN');
+  const hoTen=Object.values(formVals).find(f=>f.label.includes('tên')||f.label.includes('Tên'))?.value||'Không rõ';
+  const payload={thoi_gian:now,loai_thu_tuc:p.name,vneid_mode:vneidChoice};
+  Object.values(formVals).forEach(f=>{if(f.value)payload[slug(f.label)]=f.value;});
+  const tgLines=[`📋 *HỒ SƠ MỚI — ${p.name}*`,`🕐 ${now}`,``];
+  if(vneidChoice==='uy_quyen') tgLines.push(`👥 *Làm hộ:* ${document.getElementById('uy-ten').value} — ${document.getElementById('uy-cccd').value}`,'');
+  Object.values(formVals).filter(f=>f.value).forEach(f=>tgLines.push(`*${f.label}:* ${fmtD(f.value)}`));
+  tgLines.push(``,`📍 ${p.place}`,`💰 Lệ phí: ${p.fee}`);
+
+  if(CFG.su){
+    const el=addSR(c,'sending','Đang gửi vào Google Sheets...');
+    try{ await fetch(CFG.su,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); updSR(el,'success','✅ Đã lưu vào Google Sheets'); }
+    catch{ updSR(el,'error','❌ Không kết nối được Sheets'); }
+  } else addSR(c,'error','⚠ Google Sheets chưa cấu hình');
+
+  if(CFG.tt&&CFG.tc){
+    const el=addSR(c,'sending','Đang gửi thông báo Telegram...');
+    try{
+      const r=await fetch(`https://api.telegram.org/bot${CFG.tt}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:CFG.tc,text:tgLines.join('\n'),parse_mode:'Markdown'})});
+      const d=await r.json();
+      if(d.ok) updSR(el,'success','✅ Đã gửi thông báo Telegram');
+      else updSR(el,'error','❌ Telegram lỗi: '+(d.description||'?'));
+    } catch{ updSR(el,'error','❌ Không kết nối được Telegram'); }
+  } else addSR(c,'error','⚠ Telegram chưa cấu hình');
+}
+
+function addSR(c,cls,t){ const el=document.createElement('div'); el.className='send-row sr-'+cls; el.innerHTML=cls==='sending'?`<div class="spinner"></div><span>${t}</span>`:`<span>${t}</span>`; c.appendChild(el); return el; }
+function updSR(el,cls,t){ el.className='send-row sr-'+cls; el.innerHTML=`<span>${t}</span>`; }
+function slug(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').replace(/[^a-z0-9]+/gi,'_').toLowerCase(); }
+</script>
+</body>
+</html>
